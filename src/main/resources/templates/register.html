@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="#{site.title.register}"></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-signin {
+            width: 250px;
+        }
+        .form-control {
+            height: 35px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <form class="form-signin" th:action="@{/user/register}" method="post">
+        <h1 class="h3 mb-3 font-weight-normal" th:text="#{btn.singIn}"></h1>
+        <div class="mb-3">
+            <label for="username" class="sr-only" th:text="#{label.userName}"></label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="ユーザー名" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="sr-only" th:text="#{label.password}"></label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="パスワード" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" th:text="#{btn.register}"></button>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+</body>
+</html>

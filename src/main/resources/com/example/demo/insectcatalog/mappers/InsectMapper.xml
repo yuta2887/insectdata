@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.insectcatalog.mappers.InsectMapper">
+
+  <resultMap id="insectMap" type="com.example.demo.insectcatalog.beans.Insect" autoMapping="true">
+    <association property="insect_id" javaType="com.example.demo.insectcatalog.beans.InsectKindType" autoMapping="true">
+        <id column="insect_id" property="insect_id"/>
+        <result column="species_name" property="species_name"/>
+    </association>
+  </resultMap>
+
+  <select id="selectAllByInsects" resultMap="insectMap">
+    SELECT 
+        insect.insect_no,
+        insect.insect_id,
+        insect.insect_name,
+        insect.insect_area,
+        insect.insect_family,
+        insect.insect_stock,
+        insect.set_day,
+        insect.version,
+        insect_kind.species_name
+    FROM 
+        insect 
+    LEFT OUTER JOIN 
+        insect_kind 
+    ON 
+        insect.insect_id = insect_kind.insect_id
+   <where> 
+      <if test="insect_id != null">
+        AND insect.insect_id = #{insect_id}
+      </if>
+      <if test="keyword != null">
+        AND insect.insect_name LIKE CONCAT('%', #{keyword}, '%')
+      </if>
+    </where>  
+    ORDER BY insect_no
+  </select>
+
+  <select id="select" resultMap="insectMap">
+    SELECT 
+        insect.insect_no,
+        insect_kind.species_name,
+        insect.insect_name,
+        insect.insect_area,
+        insect.insect_family,
+        insect.insect_stock,
+        insect.set_day,
+        insect.version
+    FROM 
+        insect 
+    LEFT OUTER JOIN 
+        insect_kind
+    ON 
+        insect.insect_id = insect_kind.insect_id
+    WHERE
+        insect.insect_no = #{insect_no}
+    ORDER BY insect_no
+  </select>
+
+  <update id="update">
+    UPDATE
+        insect 
+    SET
+        insect_id = #{insect_id.insect_id},
+        species_name = #{insect_id.species_name},
+        insect_name = #{insect_name},
+        insect_area = #{insect_area},
+        insect_family = #{insect_family},
+        insect_stock = #{insect_stock},
+        set_day = #{set_day},
+        version = version + 1
+    WHERE
+        insect_no = #{insect_no}
+    AND
+        version = #{version}
+  </update>
+
+  <select id="selectNewInsectNo" resultType="Integer">
+    SELECT 
+        MAX(insect.insect_no) +1 
+    FROM 
+        insect 
+    FOR UPDATE
+  </select>
+
+    <insert id="add" parameterType="com.example.demo.insectcatalog.beans.Insect">
+    INSERT INTO 
+        insect
+    (
+        insect_no 
+        ,insect_id
+        ,species_name 
+        ,insect_name 
+        ,insect_area
+        ,insect_family
+        ,insect_stock
+        ,set_day
+        ,version
+    ) 
+    VALUES
+    (
+        #{insect_no}
+        ,#{insect_id.insect_id}
+        ,#{species_name} 
+        ,#{insect_name}
+        ,#{insect_area}
+        ,#{insect_family}
+        ,#{insect_stock}
+        ,NOW()
+        ,1
+    )
+  </insert>
+  <delete id="delete">
+    DELETE 
+    FROM 
+        insect
+    WHERE
+        insect_no = #{insect_no}
+        AND version = #{version}
+  </delete>
+
+</mapper>
