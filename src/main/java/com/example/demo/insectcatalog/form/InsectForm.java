@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class InsectForm {
     
-    private Integer insect_no; //1
+    private Integer insect_no; //番号
     
     @Valid
     private InsectKindType insect_id; //種族ID

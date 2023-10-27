@@ -20,7 +20,7 @@ public class User {
     
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private int id; //ユーザー識別　データベースの主キー
-   private String username; //ログイン時に使用
-   private String password; //ログイン時に使用
+   private int id; //ユーザー識別 データベースの主キー
+   private String username; //ユーザー名 ログイン時に使用
+   private String password; //パスワード ログイン時に使用
 }
