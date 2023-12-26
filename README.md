@@ -10,15 +10,27 @@ ID=10 PW=10
 
 # 使用技術
 
-・java 17
+バックエンドエンド
 
-・mybatis v3.0.2
+・java 17
 
 ・spring-boot v3.1.3  
 
 ・spring-boot-security
 
+・mybatis v3.0.2
+
+・Lombok
+
+フロントエンド
+
+・HTML5/CSS
+
+・Thymeleaf
+
 ・bootstrap v5.3.0
+
+インフラ
 
 ・VPS
 
