@@ -13,6 +13,7 @@
 <body>
     <div class="container mt-2">
         <form method="post" th:object="${insectForm}" th:action="@{/insectlist/addsave}">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
             <div class="row">
                 <div class="col">
                     <div class="alert alert-danger" role="alert" th:each="err : ${#fields.errors('global')}" th:text="${err}"></div>
@@ -61,7 +62,7 @@
             </div>
             <div class="row mb-3">
                 <div class="col text-center">
-                    <button type="submit" class="btn btn-primary" th:formaction="@{/insectlist/addsave}" th:text="#{btn.register}"></button>
+                    <button type="submit" class="btn btn-primary" th:formaction="@{/insectlist/add}" th:text="#{btn.register}"></button>
                 </div>
             </div>
         </form>

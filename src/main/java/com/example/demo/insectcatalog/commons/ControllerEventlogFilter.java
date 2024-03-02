@@ -1,4 +1,4 @@
-package com.example.demo.insectcatalog.commons;
+/*package com.example.demo.insectcatalog.commons;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component //このクラスは自動的にインスタンス化され、そのインスタンスはSpringのIoCコンテナ内に保存される
 @Aspect //特定のタイミングで実行される @Before("execution　@After("execution
 @Slf4j //SLF4Jの実装
-public class EventlogFilter {
+public class ControllerEventlogFilter {
 
     // InsectController内の全てのメソッド実行前に実行される
     @Before("execution(* com.example.demo.insectcatalog..*InsectController.*(..))")
@@ -28,3 +28,4 @@ public class EventlogFilter {
     }
     
 }
+*/

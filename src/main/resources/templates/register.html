@@ -24,6 +24,7 @@
 </head>
 <body>
     <form class="form-signin" th:action="@{/user/register}" method="post">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
         <h1 class="h3 mb-3 font-weight-normal" th:text="#{btn.singIn}"></h1>
         <div class="mb-3">
             <label for="username" class="sr-only" th:text="#{label.userName}"></label>

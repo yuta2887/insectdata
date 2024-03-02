@@ -1,6 +1,6 @@
-package com.example.demo.insectcatalog.controller;
+    package com.example.demo.insectcatalog.controller;
 
-import java.util.List;
+    import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -20,119 +20,104 @@ import com.example.demo.insectcatalog.form.InsectForm;
 import com.example.demo.insectcatalog.form.InsectSearchForm;
 import com.example.demo.insectcatalog.services.InsectService;
 
-import lombok.extern.log4j.Log4j2;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@Log4j2 //SLF4Jの実装
-@Controller //Spring MVCのコントローラとして動作
-public class InsectController {
+    @Controller
+    @RequiredArgsConstructor
+    @Slf4j
+    public class InsectController {
 
-    private final InsectService insectService;
-    // InsectServiceをInsectControllerに注入
-    public InsectController(InsectService insectService) {
-        this.insectService = insectService;
-    }
+        // @RequiredArgsConstructorを使用し、InsectServiceをコンストラクタインジェクション
+        private final InsectService insectService;
 
-    // ログインページを表示
-    @GetMapping("/login")
-    public String login() {
-        return "login";  
-    }
+        // viewとredirectの定数化
+        private static final String VIEW_LOGIN = "login";
+        private static final String VIEW_INSECT_LIST = "insect_list";
+        private static final String VIEW_UPDATE = "update";
+        private static final String VIEW_ADD = "add";
+        private static final String REDIRECT_INSECT_LIST = "redirect:/insectlist";
 
-    // 昆虫リストページを表示
-    @GetMapping("/insectlist")
-    public String showInsectPage(InsectSearchForm insectSearchForm, Model model) {          
-        log.info("Loading insect data: {}", insectSearchForm);
-        this.addToModelInsects(insectSearchForm, model);
-        this.addToModelInsectKinds(model);
-        return "insect_list";
-    }
+        //モデル名を定数化
+        private static final String MODEL_ATTRIBUTE_INSECTS = "insect";
+        private static final String MODEL_ATTRIBUTE_INSECT_FORM = "insectForm";
+        private static final String MODEL_ATTRIBUTE_INSECT_KIND_TYPES = "insectKindType";
 
-    // 検索結果をリセット
-    @GetMapping("/insectlist/reset")
-    public String searchReset(InsectSearchForm insectsearch, Model model){     
-        this.addToModelInsectKinds(model);
-        this.addToModelInsects(insectsearch, model);
-        return "insect_list";
-    }
-
-    // 更新ページを表示
-    @GetMapping("/insectlist/{insect_no}")
-    public String showUpdateInsectPage(@PathVariable("insect_no") Integer insect_no,  @ModelAttribute InsectForm insectForm, Model model){
-        this.addToModelInsectKinds(model);
-        Insect insectno = insectService.getInsectById(insect_no);
-        BeanUtils.copyProperties(insectno, insectForm);
-        return "update";
-    }  
-    
-    // 情報を更新
-    @PostMapping("/insectlist/updatesave")
-    public String updateInsect(@Validated @ModelAttribute InsectForm insectForm, BindingResult result){
-        if (result.hasErrors()) {
-            return "update"; 
+        // MODEL_ATTRIBUTE_INSECT_KIND_TYPESにinsectKindType
+        @ModelAttribute(MODEL_ATTRIBUTE_INSECT_KIND_TYPES)
+        public List<InsectKindType> populateInsectKinds() {
+            return insectService.getKindInsect();
         }
-        try {
-            Insect insect = convertToEntity(insectForm);
-            insectService.update(insect);
-            return "redirect:/insectlist";   
-        } catch (OptimisticLockingFailureException e) {
-            result.addError(new ObjectError("global", e.getMessage()));
-            return "update";
-        }
-    }
 
-    // データの削除
-    @PostMapping("/insectlist/delete")
-    public String deleteInsect(@ModelAttribute InsectForm insectForm, BindingResult result){
-        try{
+        @GetMapping("/login")
+        public String login() {
+            return VIEW_LOGIN;
+        }
+
+        @GetMapping({"/insectlist", "/insectlist/reset"})
+        public String showInsectPage(InsectSearchForm insectSearchForm, Model model) {
+            List<Insect> insects = insectService.getInsect(insectSearchForm);
+            model.addAttribute(MODEL_ATTRIBUTE_INSECTS, insects);
+            return VIEW_INSECT_LIST;
+        }
+
+        @GetMapping("/insectlist/{insect_no}")
+        public String showUpdateInsectPage(@PathVariable("insect_no") Integer insect_no, Model model) {
+            Insect insect = insectService.getInsectById(insect_no);
+            InsectForm insectForm = new InsectForm();
+            BeanUtils.copyProperties(insect, insectForm);
+            model.addAttribute(MODEL_ATTRIBUTE_INSECT_FORM, insectForm);
+            return VIEW_UPDATE;
+        }
+
+        @GetMapping("/insectlist/add")
+        public String showAddInsectPage(Model model) {
+            model.addAttribute(MODEL_ATTRIBUTE_INSECT_FORM, new InsectForm());
+            return VIEW_ADD;
+        }
+
+        @PostMapping("/insectlist/add")
+        public String addInsect(@Validated @ModelAttribute(MODEL_ATTRIBUTE_INSECT_FORM) InsectForm insectForm, BindingResult result) {
+            return processInsect(insectForm, result, null);
+        }
+
+        @PostMapping("/insectlist/update/{insect_no}")
+        public String updateInsect(@Validated @ModelAttribute(MODEL_ATTRIBUTE_INSECT_FORM) InsectForm insectForm, BindingResult result, @PathVariable("insect_no") Integer insect_no) {
+            return processInsect(insectForm, result, insect_no);
+        }
+
+        private String processInsect(InsectForm insectForm, BindingResult result, Integer insect_no) {
+            if (result.hasErrors()) {
+                return (insect_no == null) ? VIEW_ADD : VIEW_UPDATE;
+            }
+            try {
+                Insect insect = convertToEntity(insectForm);
+                if (insect_no != null) {
+                    insect.setInsect_no(insect_no);
+                }
+                if (insect_no == null) {
+                    insectService.add(insect);
+                } else {
+                    insectService.update(insect);
+                }
+                return REDIRECT_INSECT_LIST;
+            } catch (OptimisticLockingFailureException e) {
+                log.error("Optimistic locking failure: {}", e.getMessage());
+                result.addError(new ObjectError("globalError", "処理中にエラーが発生しました。もう一度試してください"));
+                return (insect_no == null) ? VIEW_ADD : VIEW_UPDATE;
+            }
+        }
+
+        @PostMapping("/insectlist/delete")
+        public String deleteInsect(@ModelAttribute InsectForm insectForm) {
             Insect insect = convertToEntity(insectForm);
             insectService.delete(insect);
-            return "redirect:/insectlist";
-        }catch(OptimisticLockingFailureException e){
-            result.addError(new ObjectError("global", e.getMessage()));
-            return "update";
+            return REDIRECT_INSECT_LIST;
+        }
+
+        private Insect convertToEntity(InsectForm insectForm) {
+            Insect insect = new Insect();
+            BeanUtils.copyProperties(insectForm, insect);
+            return insect;
         }
     }
-
-    // データの追加ページの表示
-    @GetMapping("/insectlist/add")
-    public String showAddInsectPage(InsectForm insectForm, Model model){
-        this.addToModelInsectKinds(model);
-        return "add";
-    }
-
-    // データ追加
-    @PostMapping("/insectlist/addsave")
-    public String addInsect(@Validated @ModelAttribute InsectForm insectForm, BindingResult result){
-        if (result.hasErrors()) {
-            return "add"; 
-        }    
-        try{
-            Insect insect = convertToEntity(insectForm);
-            insectService.add(insect);
-            return "redirect:/insectlist";
-        }catch(OptimisticLockingFailureException e){
-            result.addError(new ObjectError("global", e.getMessage()));
-            return "add";
-        }
-    }
-
-    // 種類リストの準備
-    private void addToModelInsectKinds(Model model) {
-        List<InsectKindType> insectKindTypes = insectService.getKindInsect();
-        model.addAttribute("insectKindTypes", insectKindTypes);
-    }
-
-    // 昆虫リストの準備
-    private void addToModelInsects(InsectSearchForm insectSearchForm, Model model) {
-        List<Insect> insects = insectService.getInsect(insectSearchForm);
-        model.addAttribute("insects", insects);
-    }
-
-    // InsectFormの内容をinsectに変換
-    public Insect convertToEntity(InsectForm insectForm) {
-        Insect insect = new Insect();
-        BeanUtils.copyProperties(insectForm, insect);
-        return insect;
-    }
-
-}

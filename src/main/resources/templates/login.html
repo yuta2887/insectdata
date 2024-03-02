@@ -36,7 +36,6 @@
 <body>
 
     <form class="form-signin" action="/user/login" method="POST">
-
         <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
         <h1 class="h3 mb-3 font-weight-normal" th:text="#{h1.title.login}"></h1>
         <div class="mb-3">
